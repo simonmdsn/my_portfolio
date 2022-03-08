@@ -50,7 +50,6 @@ class _WordlePageState extends ConsumerState<WordlePage> {
     wordCountMap.clear();
     word.split('').forEach((character) =>
         wordCountMap[character] = (wordCountMap[character] ?? 0) + 1);
-    //print('Word is $word');
   }
 
   void reset() {
@@ -61,11 +60,11 @@ class _WordlePageState extends ConsumerState<WordlePage> {
     for (var list in wordleTiles) {
       for (var tile in list) {
         tile.letter = '';
-        tile.closeness = WordleTileCloseness.nonExistent;
+        tile.closeness = WordleCloseness.nonExistent;
       }
     }
     for (var element in keyboardTiles) {
-      element.closeness = WordleTileCloseness.notChecked;
+      element.closeness = WordleCloseness.notChecked;
     }
     setState(() {});
   }
@@ -80,7 +79,7 @@ class _WordlePageState extends ConsumerState<WordlePage> {
           child: Center(
             child: Column(
               children: [
-                Text(
+                const Text(
                   'Wordle',
                   style: TextStyle(fontSize: 64),
                 ),
@@ -96,7 +95,9 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                     autofocus: true,
                     onKey: (key) {
                       if (gameFinished) {
-                        print(word);
+                        if (kDebugMode) {
+                          print(word);
+                        }
                         return;
                       }
                       if (key.runtimeType == RawKeyUpEvent ||
@@ -116,29 +117,32 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                                   .reduce(
                                       (value, element) => value + element) ==
                               wordleTiles[col].length) {
+                        final columnTiles = wordleTiles[col];
                         final cloneMap = Map.from(wordCountMap);
-                        for (int i = 0; i < wordleTiles[col].length; i++) {
-                          if (cloneMap
-                                  .containsKey(wordleTiles[col][i].letter) &&
-                              cloneMap[wordleTiles[col][i].letter] > 0) {
-                            wordleTiles[col][i].closeness =
-                                WordleTileCloseness.wrongSpot;
-                            if (word.split('')[i] ==
-                                wordleTiles[col][i].letter) {
-                              wordleTiles[col][i].closeness =
-                                  WordleTileCloseness.correctSpot;
-                            }
-                            cloneMap[wordleTiles[col][i].letter]--;
+                        final characters = word.split('');
+                        for (int i = 0; i < columnTiles.length; i++) {
+                          if (characters[i] == columnTiles[i].letter) {
+                            columnTiles[i].closeness =
+                                WordleCloseness.correctSpot;
+                            cloneMap[columnTiles[i].letter]--;
+                          }
+                        }
+                        for (int i = 0; i < columnTiles.length; i++) {
+                          if (cloneMap.containsKey(columnTiles[i].letter) &&
+                              cloneMap[columnTiles[i].letter] > 0) {
+                            columnTiles[i].closeness =
+                                WordleCloseness.wrongSpot;
+                            cloneMap[columnTiles[i].letter]--;
                           }
                           keyboardTiles[keyboardTiles.indexWhere((element) =>
                                   element.letter ==
-                                  wordleTiles[col][i].letter.toUpperCase())]
-                              .changeCloseness(wordleTiles[col][i].closeness);
+                                  columnTiles[i].letter.toUpperCase())]
+                              .changeCloseness(columnTiles[i].closeness);
                           setState(() {});
                         }
-                        if (wordleTiles[col].every((wordleTile) =>
+                        if (columnTiles.every((wordleTile) =>
                             wordleTile.closeness ==
-                            WordleTileCloseness.correctSpot)) {
+                            WordleCloseness.correctSpot)) {
                           gameFinished = true;
                         }
                         row = 0;
@@ -198,7 +202,7 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                                   child: const Text('Reset')),
                             ],
                           ),
-                          Divider(),
+                          const Divider(),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: keyboardTiles
@@ -258,18 +262,18 @@ class _WordlePageState extends ConsumerState<WordlePage> {
   }
 }
 
-enum WordleTileCloseness { correctSpot, wrongSpot, nonExistent, notChecked }
+enum WordleCloseness { correctSpot, wrongSpot, nonExistent, notChecked }
 
-extension WordleTileClosenessExtension on WordleTileCloseness {
+extension WordleTileClosenessExtension on WordleCloseness {
   String get name => describeEnum(this);
 
   Color get color {
     switch (this) {
-      case WordleTileCloseness.correctSpot:
+      case WordleCloseness.correctSpot:
         return Colors.green;
-      case WordleTileCloseness.wrongSpot:
+      case WordleCloseness.wrongSpot:
         return Colors.orangeAccent;
-      case WordleTileCloseness.notChecked:
+      case WordleCloseness.notChecked:
         return Colors.grey;
       default:
         return const Color(0xFF3F3F3F);
@@ -279,17 +283,17 @@ extension WordleTileClosenessExtension on WordleTileCloseness {
 
 class WordleTile {
   String letter = '';
-  WordleTileCloseness closeness = WordleTileCloseness.nonExistent;
+  WordleCloseness closeness = WordleCloseness.nonExistent;
 }
 
 class KeyboardTile {
   final String letter;
-  WordleTileCloseness closeness = WordleTileCloseness.notChecked;
+  WordleCloseness closeness = WordleCloseness.notChecked;
 
-  void changeCloseness(WordleTileCloseness closeness) {
-    if (this.closeness == WordleTileCloseness.correctSpot) return;
-    if (this.closeness == WordleTileCloseness.wrongSpot &&
-        closeness == WordleTileCloseness.nonExistent) return;
+  void changeCloseness(WordleCloseness closeness) {
+    if (this.closeness == WordleCloseness.correctSpot) return;
+    if (this.closeness == WordleCloseness.wrongSpot &&
+        closeness == WordleCloseness.nonExistent) return;
     this.closeness = closeness;
   }
 

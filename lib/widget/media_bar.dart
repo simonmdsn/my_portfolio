@@ -14,7 +14,7 @@ class MediaBar extends StatelessWidget {
           onPressed: () =>
               js.context.callMethod('open', ['https://github.com/simonmdsn']),
           icon: Image.asset(
-            'assets/images/github.png',
+            '/images/github.png',
           ),
           iconSize: 32,
           splashRadius: 24,
@@ -24,7 +24,7 @@ class MediaBar extends StatelessWidget {
           onPressed: () => js.context.callMethod('open',
               ['https://www.linkedin.com/in/simon-soele-madsen-14b427199/']),
           icon: Image.asset(
-            'assets/images/linkedin.png',
+            'images/linkedin.png',
           ),
           iconSize: 32,
           splashRadius: 24,

@@ -47,6 +47,7 @@ class _WordlePageState extends ConsumerState<WordlePage> {
     final allWords = response.body.split('\n');
     final nextInt = Random().nextInt(allWords.length);
     word = allWords[nextInt];
+    wordCountMap.clear();
     word.split('').forEach((character) =>
         wordCountMap[character] = (wordCountMap[character] ?? 0) + 1);
     //print('Word is $word');
@@ -57,33 +58,38 @@ class _WordlePageState extends ConsumerState<WordlePage> {
     row = 0;
     col = 0;
     gameFinished = false;
-    wordleTiles.forEach((list) {
-      list.forEach((tile) {
+    for (var list in wordleTiles) {
+      for (var tile in list) {
         tile.letter = '';
         tile.closeness = WordleTileCloseness.nonExistent;
-      });
-    });
-    keyboardTiles.forEach((element) {
+      }
+    }
+    for (var element in keyboardTiles) {
       element.closeness = WordleTileCloseness.notChecked;
-    });
+    }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: ()=> keyBoardFocusNode.requestFocus(),
+      onTap: () => keyBoardFocusNode.requestFocus(),
       child: BasePage(
         withMediaBar: true,
         child: SingleChildScrollView(
           child: Center(
             child: Column(
               children: [
-                Text('Wordle',style: TextStyle(fontSize: 64),),
+                Text(
+                  'Wordle',
+                  style: TextStyle(fontSize: 64),
+                ),
                 ConstrainedBox(
                   constraints: BoxConstraints.expand(
                     width: 800,
-                    height: MediaQuery.of(context).size.height - MediaBar.height - 300,
+                    height: MediaQuery.of(context).size.height -
+                        MediaBar.height -
+                        300,
                   ),
                   child: RawKeyboardListener(
                     focusNode: keyBoardFocusNode,
@@ -107,19 +113,18 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                       if (key.data.physicalKey == PhysicalKeyboardKey.enter &&
                           wordleTiles[col]
                                   .map((e) => e.letter.isNotEmpty ? 1 : 0)
-                                  .reduce((value, element) => value + element) ==
+                                  .reduce(
+                                      (value, element) => value + element) ==
                               wordleTiles[col].length) {
                         final cloneMap = Map.from(wordCountMap);
                         for (int i = 0; i < wordleTiles[col].length; i++) {
-                          if (cloneMap.containsKey(wordleTiles[col][i].letter) &&
+                          if (cloneMap
+                                  .containsKey(wordleTiles[col][i].letter) &&
                               cloneMap[wordleTiles[col][i].letter] > 0) {
                             wordleTiles[col][i].closeness =
                                 WordleTileCloseness.wrongSpot;
-                            if (cloneMap.keys
-                                        .toList()
-                                        .indexOf(wordleTiles[col][i].letter) ==
-                                    i ||
-                                word.split('')[i] == wordleTiles[col][i].letter) {
+                            if (word.split('')[i] ==
+                                wordleTiles[col][i].letter) {
                               wordleTiles[col][i].closeness =
                                   WordleTileCloseness.correctSpot;
                             }
@@ -132,7 +137,8 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                           setState(() {});
                         }
                         if (wordleTiles[col].every((wordleTile) =>
-                            wordleTile.closeness == WordleTileCloseness.correctSpot)) {
+                            wordleTile.closeness ==
+                            WordleTileCloseness.correctSpot)) {
                           gameFinished = true;
                         }
                         row = 0;
@@ -141,7 +147,8 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                           gameFinished = true;
                         }
                       }
-                      if (key.data.physicalKey == PhysicalKeyboardKey.backspace) {
+                      if (key.data.physicalKey ==
+                          PhysicalKeyboardKey.backspace) {
                         if (row > 0) {
                           row--;
                         }
@@ -182,15 +189,15 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                                   )
                                   .toList(),
                             ),
-                          if (gameFinished)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('Word was: $word'),
-                                TextButton(
-                                    onPressed: () => reset(), child: const Text('Reset')),
-                              ],
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (gameFinished) Text('Word was: $word'),
+                              TextButton(
+                                  onPressed: () => reset(),
+                                  child: const Text('Reset')),
+                            ],
+                          ),
                           Divider(),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,

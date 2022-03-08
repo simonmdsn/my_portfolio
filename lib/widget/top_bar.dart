@@ -103,16 +103,19 @@ class _ToolsDropdownMenuState extends State<ToolsDropdownMenu> {
     return Positioned(
       left: widget.parentPosition.left,
       child: Container(
-        color: const Color(0xFFEEEEEE),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: RouteNames.toolsPages
-              .map((e) => MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, e),
-                      child: Text(e.split('/').last.capitalize()))))
-              .toList(),
+        color: Colors.grey,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: RouteNames.toolsPages
+                .map((e) => MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                        onTap: () => Navigator.pushNamed(context, e),
+                        child: Text(e.split('/').last.capitalize()))))
+                .toList(),
+          ),
         ),
       ),
     );

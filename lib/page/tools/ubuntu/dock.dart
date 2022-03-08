@@ -75,6 +75,7 @@ class _DockState extends ConsumerState<Dock> {
                 onPressed: () {
                   var key = UniqueKey();
                   ref.watch(windowManagerProvider.notifier).add(TypeTrainer(
+                    windowKey: key,
                     key: key,
                   ));
                 },

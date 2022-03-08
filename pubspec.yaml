@@ -20,6 +20,7 @@ dependencies:
   flutter_hooks: ^0.18.0
   mqtt_client: ^9.6.3
   intl: ^0.17.0
+  desktop_drop: ^0.3.2
   #args:
    # git:
     #  url: git://github.com/simonmdsn/args.git

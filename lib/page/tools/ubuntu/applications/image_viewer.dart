@@ -26,41 +26,38 @@ class _ImageViewerState extends ConsumerState<ImageViewer> {
   Widget build(BuildContext context) {
     var draggableWindow =
         ref.watch(windowManagerProvider.notifier).get(widget.key!);
-    return DraggableWindow(
-      update: () => setState(() {}),
-      child: ApplicationHolder(
-        callerKey: widget.key!,
-        header: Stack(
-          children: [
-            Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                    '${(_transformationController.value.getMaxScaleOnAxis() * 100).toInt()} %')),
-            Align(
-                alignment: Alignment.center,
-                child: Text(widget.imageFile?.name.split('/').last ?? '')),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: WindowHeader.getButtons(ref.watch(windowManagerProvider.notifier), draggableWindow as DraggableWindow, context),
-            ),
-          ],
-        ),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: InteractiveViewer(
-            transformationController: _transformationController,
-            onInteractionEnd: (details) => setState(() {}),
-            maxScale: 10,
-            minScale: 0.5,
-            child: Image.memory(
-              widget.imageFile?.content ?? Uint8List.fromList([123,123,123]),
-              fit: BoxFit.cover,
-            ),
-            // child: Image.asset(
-            //   widget.imageFile,
-            //   fit: BoxFit.scaleDown,
-            // ),
+    return ApplicationHolder(
+      callerKey: widget.key!,
+      header: Stack(
+        children: [
+          Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                  '${(_transformationController.value.getMaxScaleOnAxis() * 100).toInt()} %')),
+          Align(
+              alignment: Alignment.center,
+              child: Text(widget.imageFile?.name.split('/').last ?? '')),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: WindowHeader.getButtons(ref.watch(windowManagerProvider.notifier), draggableWindow as DraggableWindow, context),
           ),
+        ],
+      ),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: InteractiveViewer(
+          transformationController: _transformationController,
+          onInteractionEnd: (details) => setState(() {}),
+          maxScale: 10,
+          minScale: 0.5,
+          child: Image.memory(
+            widget.imageFile?.content ?? Uint8List.fromList([123,123,123]),
+            fit: BoxFit.cover,
+          ),
+          // child: Image.asset(
+          //   widget.imageFile,
+          //   fit: BoxFit.scaleDown,
+          // ),
         ),
       ),
     );

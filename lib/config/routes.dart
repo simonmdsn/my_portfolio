@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:my_portfolio/page/home_page.dart';
 import 'package:my_portfolio/page/tools/chat_page.dart';
 import 'package:my_portfolio/page/tools/strings_page.dart';
+import 'package:my_portfolio/page/tools/image_pages.dart';
 import 'package:my_portfolio/page/tools/ubuntu/ubuntu_page.dart';
+import 'package:my_portfolio/page/tools/wordle_page.dart';
 
 class RouteNames {
   static const homePage = '/home';
@@ -12,6 +14,9 @@ class RouteNames {
   static const stringPage = tools + '/strings';
   static const ubuntuPage = tools + '/ubuntu';
   static const chatPage = tools + '/chat';
+  static const imagesPage = tools + '/images';
+  static const wordlePage = tools + '/wordle';
+
 
 
 
@@ -19,6 +24,8 @@ class RouteNames {
     stringPage,
     ubuntuPage,
     chatPage,
+    imagesPage,
+    wordlePage
   ];
 }
 
@@ -36,6 +43,10 @@ class RouteGenerator {
             widget: const UbuntuPage(), routeName: settings.name!);
       case RouteNames.chatPage:
         return _GeneratePageRoute(widget: const ChatPage(), routeName: settings.name!);
+      case RouteNames.imagesPage:
+        return _GeneratePageRoute(widget: const ImagesPage(), routeName: settings.name!);
+      case RouteNames.wordlePage:
+        return _GeneratePageRoute(widget: const WordlePage(), routeName: settings.name!);
       default:
         return _GeneratePageRoute(
             widget: const HomePage(), routeName: settings.name!);

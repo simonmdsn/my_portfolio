@@ -7,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 class MediaBar extends StatelessWidget {
   const MediaBar({Key? key}) : super(key: key);
 
+  static double height = 60.0;
+
   static mediaButtons() => [
         IconButton(
           onPressed: () =>
@@ -48,6 +50,7 @@ class MediaBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width * .3,
+      height: height,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: mediaButtons(),

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:my_portfolio/page/home_page.dart';
+import 'package:my_portfolio/page/tools/2048_page.dart';
 import 'package:my_portfolio/page/tools/chat_page.dart';
 import 'package:my_portfolio/page/tools/strings_page.dart';
 import 'package:my_portfolio/page/tools/image_pages.dart';
@@ -16,16 +17,15 @@ class RouteNames {
   static const chatPage = tools + '/chat';
   static const imagesPage = tools + '/images';
   static const wordlePage = tools + '/wordle';
-
-
-
+  static const p2048Page = tools + '/2048';
 
   static const List<String> toolsPages = [
     stringPage,
     ubuntuPage,
     chatPage,
     imagesPage,
-    wordlePage
+    wordlePage,
+    p2048Page
   ];
 }
 
@@ -42,11 +42,17 @@ class RouteGenerator {
         return _GeneratePageRoute(
             widget: const UbuntuPage(), routeName: settings.name!);
       case RouteNames.chatPage:
-        return _GeneratePageRoute(widget: const ChatPage(), routeName: settings.name!);
+        return _GeneratePageRoute(
+            widget: const ChatPage(), routeName: settings.name!);
       case RouteNames.imagesPage:
-        return _GeneratePageRoute(widget: const ImagesPage(), routeName: settings.name!);
+        return _GeneratePageRoute(
+            widget: const ImagesPage(), routeName: settings.name!);
       case RouteNames.wordlePage:
-        return _GeneratePageRoute(widget: const WordlePage(), routeName: settings.name!);
+        return _GeneratePageRoute(
+            widget: const WordlePage(), routeName: settings.name!);
+      case RouteNames.p2048Page:
+        return _GeneratePageRoute(
+            widget: const P2048Page(), routeName: settings.name!);
       default:
         return _GeneratePageRoute(
             widget: const HomePage(), routeName: settings.name!);

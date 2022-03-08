@@ -26,11 +26,8 @@ class _WordlePageState extends ConsumerState<WordlePage> {
   bool gameFinished = false;
   final wordCountMap = <String, int>{};
 
-  final keyboardTiles = List.of('qwertyuiopasdfghjklzxcvbnm'
-      .toUpperCase()
-      .split('')
-      .map((e) => KeyboardTile(e))
-      .toList());
+  final keyboardTiles = List.of(
+      'qwertyuiopasdfghjklzxcvbnm'.toUpperCase().split('').map((e) => KeyboardTile(e)).toList());
 
   final keyBoardFocusNode = FocusNode();
 
@@ -42,14 +39,14 @@ class _WordlePageState extends ConsumerState<WordlePage> {
   }
 
   fetchWord() async {
-    final response =
-        await http.get(Uri.parse('/assets/dict/five-letter-words.txt'));
+    final response = await http.get(Uri.parse('/assets/dict/five-letter-words.txt'));
     final allWords = response.body.split('\n');
     final nextInt = Random().nextInt(allWords.length);
     word = allWords[nextInt];
     wordCountMap.clear();
-    word.split('').forEach((character) =>
-        wordCountMap[character] = (wordCountMap[character] ?? 0) + 1);
+    word
+        .split('')
+        .forEach((character) => wordCountMap[character] = (wordCountMap[character] ?? 0) + 1);
   }
 
   void reset() {
@@ -86,9 +83,7 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                 ConstrainedBox(
                   constraints: BoxConstraints.expand(
                     width: 800,
-                    height: MediaQuery.of(context).size.height -
-                        MediaBar.height -
-                        300,
+                    height: MediaQuery.of(context).size.height - MediaBar.height - 300,
                   ),
                   child: RawKeyboardListener(
                     focusNode: keyBoardFocusNode,
@@ -100,8 +95,7 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                         }
                         return;
                       }
-                      if (key.runtimeType == RawKeyUpEvent ||
-                          col >= wordleTiles.length) {
+                      if (key.runtimeType == RawKeyUpEvent || col >= wordleTiles.length) {
                         return;
                       }
                       if (row < wordleTiles[0].length &&
@@ -114,35 +108,30 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                       if (key.data.physicalKey == PhysicalKeyboardKey.enter &&
                           wordleTiles[col]
                                   .map((e) => e.letter.isNotEmpty ? 1 : 0)
-                                  .reduce(
-                                      (value, element) => value + element) ==
+                                  .reduce((value, element) => value + element) ==
                               wordleTiles[col].length) {
                         final columnTiles = wordleTiles[col];
                         final cloneMap = Map.from(wordCountMap);
                         final characters = word.split('');
                         for (int i = 0; i < columnTiles.length; i++) {
                           if (characters[i] == columnTiles[i].letter) {
-                            columnTiles[i].closeness =
-                                WordleCloseness.correctSpot;
+                            columnTiles[i].closeness = WordleCloseness.correctSpot;
                             cloneMap[columnTiles[i].letter]--;
                           }
                         }
                         for (int i = 0; i < columnTiles.length; i++) {
                           if (cloneMap.containsKey(columnTiles[i].letter) &&
                               cloneMap[columnTiles[i].letter] > 0) {
-                            columnTiles[i].closeness =
-                                WordleCloseness.wrongSpot;
+                            columnTiles[i].closeness = WordleCloseness.wrongSpot;
                             cloneMap[columnTiles[i].letter]--;
                           }
                           keyboardTiles[keyboardTiles.indexWhere((element) =>
-                                  element.letter ==
-                                  columnTiles[i].letter.toUpperCase())]
+                                  element.letter == columnTiles[i].letter.toUpperCase())]
                               .changeCloseness(columnTiles[i].closeness);
                           setState(() {});
                         }
-                        if (columnTiles.every((wordleTile) =>
-                            wordleTile.closeness ==
-                            WordleCloseness.correctSpot)) {
+                        if (columnTiles.every(
+                            (wordleTile) => wordleTile.closeness == WordleCloseness.correctSpot)) {
                           gameFinished = true;
                         }
                         row = 0;
@@ -151,8 +140,7 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                           gameFinished = true;
                         }
                       }
-                      if (key.data.physicalKey ==
-                          PhysicalKeyboardKey.backspace) {
+                      if (key.data.physicalKey == PhysicalKeyboardKey.backspace) {
                         if (row > 0) {
                           row--;
                         }
@@ -182,8 +170,7 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                                                 child: Text(
                                                   e.letter.toUpperCase(),
                                                   style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 30),
+                                                      color: Colors.white, fontSize: 30),
                                                   textAlign: TextAlign.center,
                                                 ),
                                               )
@@ -197,9 +184,7 @@ class _WordlePageState extends ConsumerState<WordlePage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               if (gameFinished) Text('Word was: $word'),
-                              TextButton(
-                                  onPressed: () => reset(),
-                                  child: const Text('Reset')),
+                              TextButton(onPressed: () => reset(), child: const Text('Reset')),
                             ],
                           ),
                           const Divider(),
@@ -292,8 +277,8 @@ class KeyboardTile {
 
   void changeCloseness(WordleCloseness closeness) {
     if (this.closeness == WordleCloseness.correctSpot) return;
-    if (this.closeness == WordleCloseness.wrongSpot &&
-        closeness == WordleCloseness.nonExistent) return;
+    if (this.closeness == WordleCloseness.wrongSpot && closeness == WordleCloseness.nonExistent)
+      return;
     this.closeness = closeness;
   }
 

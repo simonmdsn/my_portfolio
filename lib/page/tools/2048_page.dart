@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_portfolio/page/base_page.dart';
+import 'package:my_portfolio/widget/top_bar.dart';
 
 class P2048Page extends ConsumerStatefulWidget {
   const P2048Page({
@@ -15,11 +18,19 @@ class P2048Page extends ConsumerStatefulWidget {
 }
 
 class _P2048PageState extends ConsumerState<P2048Page> {
-  final List<List<Tile?>> board = List.generate(4, (index) => List.generate(4, (index) => null));
+  int side = 4;
+  late List<List<Tile?>> board =
+      List.generate(side, (index) => List.generate(side, (index) => null));
+  final rowInputController = TextEditingController();
+  final colInputController = TextEditingController();
+
   bool checkingAvailableMoves = false;
   int highest = 0;
   int score = 0;
   GameState gameState = GameState.going;
+
+  final List<Timer> timers = [];
+  bool isAutoPlaying = false;
 
   final colors = <int, Color>{
     2: const Color(0xFFD3C270),
@@ -48,100 +59,182 @@ class _P2048PageState extends ConsumerState<P2048Page> {
     _spawnRandomTile();
     setState(() {});
     keyboardFocusNode.requestFocus();
+    //
+    //
+    //
+
     super.initState();
+  }
+
+  Widget _menu = Container();
+
+  void changeMenu(Widget menu) {
+    setState(() {
+      _menu = menu;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => keyboardFocusNode.requestFocus(),
-      child: BasePage(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints.expand(width: 800, height: 800),
-            child: RawKeyboardListener(
-              focusNode: keyboardFocusNode,
-              autofocus: true,
-              onKey: (key) {
-                if (key.runtimeType == RawKeyUpEvent) {
-                  return;
-                }
-                if (gameState != GameState.going) {
-                  return;
-                }
-                if (key.physicalKey == PhysicalKeyboardKey.arrowLeft) {
-                  _move(0, 0, -1);
-                  return;
-                }
-                if (key.physicalKey == PhysicalKeyboardKey.arrowRight) {
-                  _move(board.length * board[0].length - 1, 0, 1);
-                  return;
-                }
-                if (key.physicalKey == PhysicalKeyboardKey.arrowUp) {
-                  _move(0, -1, 0);
-                  return;
-                }
-                if (key.physicalKey == PhysicalKeyboardKey.arrowDown) {
-                  _move(board.length * board[0].length - 1, 1, 0);
-                  return;
-                }
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Center(
-                    child: SizedBox(
-                      width: 250,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [Text('Score: $score'),SizedBox(width: 60,), Text('Highest: $highest')],
-                      ),
-                    ),
-                  ),
-                  for (int i = 0; i < 4; i++)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: board[i]
-                          .map(
-                            (e) => Padding(
-                              padding: const EdgeInsets.all(2.0),
-                              child: Container(
-                                width: 60,
-                                height: 60,
-                                color: e == null ? Colors.grey : colors[e.value],
-                                //color: e.closeness.color,
-                                child: e != null
-                                    ? FittedBox(
-                                        fit: BoxFit.contain,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(2.0),
-                                          child: Text(
-                                            e.value.toString(),
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    : Container(),
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: GestureDetector(
+          onTap: () => keyboardFocusNode.requestFocus(),
+          child: Column(
+            children: [
+              TopBar(changeMenu: changeMenu),
+              Center(
+                child: RawKeyboardListener(
+                  focusNode: keyboardFocusNode,
+                  autofocus: true,
+                  onKey: (key) {
+                    if (key.runtimeType == RawKeyUpEvent) {
+                      return;
+                    }
+                    if (gameState != GameState.going) {
+                      return;
+                    }
+                    if (key.physicalKey == PhysicalKeyboardKey.arrowLeft) {
+                      _move(0, 0, -1);
+                      return;
+                    }
+                    if (key.physicalKey == PhysicalKeyboardKey.arrowRight) {
+                      _move(board.length * board[0].length - 1, 0, 1);
+                      return;
+                    }
+                    if (key.physicalKey == PhysicalKeyboardKey.arrowUp) {
+                      _move(0, -1, 0);
+                      return;
+                    }
+                    if (key.physicalKey == PhysicalKeyboardKey.arrowDown) {
+                      _move(board.length * board[0].length - 1, 1, 0);
+                      return;
+                    }
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (gameState == GameState.lose) Text('You are out of moves!'),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextButton(
+                            onPressed: () => _reset(),
+                            child: Text('Reset'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              if (isAutoPlaying) {
+                                _stopAutoPlay();
+                              } else {
+                                if(gameState == GameState.lose || gameState == GameState.won) _reset();
+                                timers.addAll([
+                                  Timer.periodic(
+                                      Duration(microseconds: 1), (timer) => _move(0, 0, -1)),
+                                  Timer.periodic(
+                                      Duration(microseconds: 1), (timer) => _move(0, -1, 0)),
+                                  Timer.periodic(Duration(microseconds: 100),
+                                      (timer) => _move(board.length * board[0].length - 1, 0, 1)),
+                                  Timer.periodic(Duration(milliseconds: 500),
+                                          (timer) => _move(board.length * board[0].length - 1, 1, 0)),
+                                ]);
+                                isAutoPlaying = true;
+                              }
+                            },
+                            child: !isAutoPlaying ? Text('Auto Play') : Text('Stop Auto Play'),
+                          ),
+                          Container(
+                            width: 45,
+                            child: TextFormField(
+                              controller: rowInputController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                              ],
+                              onChanged: (input) => side = int.parse(input),
+                              decoration: const InputDecoration(
+                                hintText: "Size",
+                                border: OutlineInputBorder(),
+                                isDense: true,
+                                contentPadding: EdgeInsets.all(6.0),
                               ),
+                              onFieldSubmitted: (submit) => _reset(),
                             ),
-                          )
-                          .toList(),
-                    ),
-                  if (gameState == GameState.lose) Text('You are out of moves!'),
-                  TextButton(
-                    onPressed: () => _reset(),
-                    child: Text('Reset'),
+                          ),
+                        ],
+                      ),
+                      Center(
+                        child: SizedBox(
+                          width: 250,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Score: $score',
+                                textAlign: TextAlign.start,
+                              ),
+                              SizedBox(
+                                width: 60,
+                              ),
+                              Text(
+                                'Highest: $highest',
+                                textAlign: TextAlign.end,
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      for (int i = 0; i < board.length; i++)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: board[i]
+                              .map(
+                                (e) => Padding(
+                                  padding: const EdgeInsets.all(2.0),
+                                  child: Container(
+                                    width: 60,
+                                    height: 60,
+                                    color: e == null ? Colors.grey : colors[e.value],
+                                    //color: e.closeness.color,
+                                    child: e != null
+                                        ? FittedBox(
+                                            fit: BoxFit.contain,
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(2.0),
+                                              child: Text(
+                                                e.value.toString(),
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        : Container(),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  void _stopAutoPlay() {
+    for (var element in timers) {
+      element.cancel();
+    }
+    timers.clear();
+    setState(() {
+      isAutoPlaying = false;
+    });
   }
 
   void _spawnRandomTile() {
@@ -209,9 +302,11 @@ class _P2048PageState extends ConsumerState<P2048Page> {
         _spawnRandomTile();
         if (!_canMove()) {
           gameState = GameState.lose;
+          _stopAutoPlay();
         }
       } else if (highest > colors.keys.last) {
         gameState = GameState.won;
+        _stopAutoPlay();
       }
       setState(() {});
     }
@@ -238,11 +333,7 @@ class _P2048PageState extends ConsumerState<P2048Page> {
   }
 
   _reset() {
-    for (int i = 0; i < board.length; i++) {
-      for (int j = 0; j < board[0].length; j++) {
-        board[i][j] = null;
-      }
-    }
+    board = List.generate(side, (index) => List.generate(side, (index) => null));
     highest = 0;
     score = 0;
     gameState = GameState.going;

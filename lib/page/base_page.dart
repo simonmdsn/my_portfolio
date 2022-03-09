@@ -27,9 +27,7 @@ class _BasePageState extends State<BasePage> {
     return Scaffold(
       body: Column(
         children: [
-          TopBar(
-            changeMenu: changeMenu,
-          ),
+          TopBar(changeMenu: changeMenu),
           Stack(
             children: [
               MouseRegion(

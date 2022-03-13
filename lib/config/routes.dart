@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:my_portfolio/page/home_page.dart';
 import 'package:my_portfolio/page/tools/2048_page.dart';
 import 'package:my_portfolio/page/tools/chat_page.dart';
+import 'package:my_portfolio/page/tools/flappy_bird_page.dart';
 import 'package:my_portfolio/page/tools/strings_page.dart';
 import 'package:my_portfolio/page/tools/image_pages.dart';
 import 'package:my_portfolio/page/tools/ubuntu/ubuntu_page.dart';
@@ -18,6 +19,8 @@ class RouteNames {
   static const imagesPage = tools + '/images';
   static const wordlePage = tools + '/wordle';
   static const p2048Page = tools + '/2048';
+  static const flappyBirdPage = tools + '/flappybird';
+
 
   static const List<String> toolsPages = [
     stringPage,
@@ -25,7 +28,8 @@ class RouteNames {
     chatPage,
     imagesPage,
     wordlePage,
-    p2048Page
+    p2048Page,
+    flappyBirdPage,
   ];
 }
 
@@ -53,6 +57,9 @@ class RouteGenerator {
       case RouteNames.p2048Page:
         return _GeneratePageRoute(
             widget: const P2048Page(), routeName: settings.name!);
+      case RouteNames.flappyBirdPage:
+        return _GeneratePageRoute(
+            widget: const FlappyBirdPage(), routeName: settings.name!);
       default:
         return _GeneratePageRoute(
             widget: const HomePage(), routeName: settings.name!);

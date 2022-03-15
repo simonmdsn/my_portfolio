@@ -3,6 +3,7 @@ import 'package:my_portfolio/page/home_page.dart';
 import 'package:my_portfolio/page/tools/2048_page.dart';
 import 'package:my_portfolio/page/tools/chat_page.dart';
 import 'package:my_portfolio/page/tools/flappy_bird_page.dart';
+import 'package:my_portfolio/page/tools/snake_page.dart';
 import 'package:my_portfolio/page/tools/strings_page.dart';
 import 'package:my_portfolio/page/tools/image_pages.dart';
 import 'package:my_portfolio/page/tools/ubuntu/ubuntu_page.dart';
@@ -20,6 +21,7 @@ class RouteNames {
   static const wordlePage = tools + '/wordle';
   static const p2048Page = tools + '/2048';
   static const flappyBirdPage = tools + '/flappybird';
+  static const snakePage = tools + '/snake';
 
 
   static const List<String> toolsPages = [
@@ -29,7 +31,7 @@ class RouteNames {
     imagesPage,
     wordlePage,
     p2048Page,
-    flappyBirdPage,
+    snakePage,
   ];
 }
 
@@ -60,6 +62,9 @@ class RouteGenerator {
       case RouteNames.flappyBirdPage:
         return _GeneratePageRoute(
             widget: const FlappyBirdPage(), routeName: settings.name!);
+      case RouteNames.snakePage:
+        return _GeneratePageRoute(
+            widget: const SnakePage(), routeName: settings.name!);
       default:
         return _GeneratePageRoute(
             widget: const HomePage(), routeName: settings.name!);

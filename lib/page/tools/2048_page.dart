@@ -50,6 +50,9 @@ class _P2048PageState extends ConsumerState<P2048Page> {
     math.pow(2, 15).toInt(): const Color(0xffb2148d),
     math.pow(2, 16).toInt(): const Color(0xffb600ff),
     math.pow(2, 17).toInt(): const Color(0xff000000),
+    math.pow(2, 18).toInt(): const Color(0xff242480),
+    math.pow(2, 19).toInt(): const Color(0xff139486),
+    math.pow(2, 20).toInt(): const Color(0xff60506b),
   };
 
   final keyboardFocusNode = FocusNode();
@@ -59,171 +62,179 @@ class _P2048PageState extends ConsumerState<P2048Page> {
     _spawnRandomTile();
     setState(() {});
     keyboardFocusNode.requestFocus();
-    //
-    //
-    //
-
     super.initState();
-  }
-
-  Widget _menu = Container();
-
-  void changeMenu(Widget menu) {
-    setState(() {
-      _menu = menu;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: GestureDetector(
-          onTap: () => keyboardFocusNode.requestFocus(),
-          child: Column(
-            children: [
-              TopBar(changeMenu: changeMenu),
-              Center(
-                child: RawKeyboardListener(
-                  focusNode: keyboardFocusNode,
-                  autofocus: true,
-                  onKey: (key) {
-                    if (key.runtimeType == RawKeyUpEvent) {
-                      return;
-                    }
-                    if (gameState != GameState.going) {
-                      return;
-                    }
-                    if (key.physicalKey == PhysicalKeyboardKey.arrowLeft) {
-                      _move(0, 0, -1);
-                      return;
-                    }
-                    if (key.physicalKey == PhysicalKeyboardKey.arrowRight) {
-                      _move(board.length * board[0].length - 1, 0, 1);
-                      return;
-                    }
-                    if (key.physicalKey == PhysicalKeyboardKey.arrowUp) {
-                      _move(0, -1, 0);
-                      return;
-                    }
-                    if (key.physicalKey == PhysicalKeyboardKey.arrowDown) {
-                      _move(board.length * board[0].length - 1, 1, 0);
-                      return;
-                    }
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      if (gameState == GameState.lose) Text('You are out of moves!'),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextButton(
-                            onPressed: () => _reset(),
-                            child: Text('Reset'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              if (isAutoPlaying) {
-                                _stopAutoPlay();
-                              } else {
-                                if(gameState == GameState.lose || gameState == GameState.won) _reset();
-                                timers.addAll([
-                                  Timer.periodic(
-                                      Duration(microseconds: 1), (timer) => _move(0, 0, -1)),
-                                  Timer.periodic(
-                                      Duration(microseconds: 1), (timer) => _move(0, -1, 0)),
-                                  Timer.periodic(Duration(microseconds: 100),
-                                      (timer) => _move(board.length * board[0].length - 1, 0, 1)),
-                                  Timer.periodic(Duration(milliseconds: 500),
-                                          (timer) => _move(board.length * board[0].length - 1, 1, 0)),
-                                ]);
-                                isAutoPlaying = true;
-                              }
-                            },
-                            child: !isAutoPlaying ? Text('Auto Play') : Text('Stop Auto Play'),
-                          ),
-                          Container(
-                            width: 45,
-                            child: TextFormField(
-                              controller: rowInputController,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: <TextInputFormatter>[
-                                FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                              ],
-                              onChanged: (input) => side = int.parse(input),
-                              decoration: const InputDecoration(
-                                hintText: "Size",
-                                border: OutlineInputBorder(),
-                                isDense: true,
-                                contentPadding: EdgeInsets.all(6.0),
-                              ),
-                              onFieldSubmitted: (submit) => _reset(),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Center(
-                        child: SizedBox(
-                          width: 250,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Score: $score',
-                                textAlign: TextAlign.start,
-                              ),
-                              SizedBox(
-                                width: 60,
-                              ),
-                              Text(
-                                'Highest: $highest',
-                                textAlign: TextAlign.end,
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                      for (int i = 0; i < board.length; i++)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: board[i]
-                              .map(
-                                (e) => Padding(
-                                  padding: const EdgeInsets.all(2.0),
-                                  child: Container(
-                                    width: 60,
-                                    height: 60,
-                                    color: e == null ? Colors.grey : colors[e.value],
-                                    //color: e.closeness.color,
-                                    child: e != null
-                                        ? FittedBox(
-                                            fit: BoxFit.contain,
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(2.0),
-                                              child: Text(
-                                                e.value.toString(),
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                        : Container(),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+    return BasePage(
+      child: GestureDetector(
+        onTap: () => keyboardFocusNode.requestFocus(),
+        child: Center(
+          child: RawKeyboardListener(
+              focusNode: keyboardFocusNode,
+              autofocus: true,
+              onKey: (key) {
+                if (key.runtimeType == RawKeyUpEvent) {
+                  return;
+                }
+                if (gameState != GameState.going) {
+                  return;
+                }
+                if (key.physicalKey == PhysicalKeyboardKey.arrowLeft) {
+                  _move(0, 0, -1);
+                  return;
+                }
+                if (key.physicalKey == PhysicalKeyboardKey.arrowRight) {
+                  _move(board.length * board[0].length - 1, 0, 1);
+                  return;
+                }
+                if (key.physicalKey == PhysicalKeyboardKey.arrowUp) {
+                  _move(0, -1, 0);
+                  return;
+                }
+                if (key.physicalKey == PhysicalKeyboardKey.arrowDown) {
+                  _move(board.length * board[0].length - 1, 1, 0);
+                  return;
+                }
+              },
+              child: GestureDetector(
+                onVerticalDragEnd: (drag) {
+                  if (gameState != GameState.going) {
+                    return;
+                  }
+                  if (drag.velocity.pixelsPerSecond.dy > 0) {
+                    _move(0, -1, 0);
+                  }
+                  if (drag.velocity.pixelsPerSecond.dy < 0) {
+                    _move(board.length * board[0].length - 1, 1, 0);
+                  }
+                },
+                onHorizontalDragEnd: (drag) {
+                  if (gameState != GameState.going) {
+                    return;
+                  }
+                  if (drag.velocity.pixelsPerSecond.dx > 0) {
+                    _move(0, 0, -1);
+                    return;
+                  }
+                  if (drag.velocity.pixelsPerSecond.dx < 0) {
+                    _move(board.length * board[0].length - 1, 0, 1);
+                    return;
+                  }
+                },
+                child: _buildBoard(),
+              )),
         ),
       ),
+    );
+  }
+
+  Widget _buildBoard() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (gameState == GameState.lose) Text('You are out of moves!'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+              onPressed: () => _reset(),
+              child: Text('Reset'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (isAutoPlaying) {
+                  _stopAutoPlay();
+                } else {
+                  if (gameState == GameState.lose || gameState == GameState.won) _reset();
+                  timers.addAll([
+                    Timer.periodic(Duration(microseconds: 1), (timer) => _move(0, 0, -1)),
+                    Timer.periodic(Duration(microseconds: 1), (timer) => _move(0, -1, 0)),
+                    Timer.periodic(Duration(microseconds: 100),
+                        (timer) => _move(board.length * board[0].length - 1, 0, 1)),
+                    Timer.periodic(Duration(milliseconds: 500),
+                        (timer) => _move(board.length * board[0].length - 1, 1, 0)),
+                  ]);
+                  isAutoPlaying = true;
+                }
+              },
+              child: !isAutoPlaying ? Text('Auto Play') : Text('Stop Auto Play'),
+            ),
+            Container(
+              width: 45,
+              child: TextFormField(
+                controller: rowInputController,
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                ],
+                onChanged: (input) => side = int.parse(input),
+                decoration: const InputDecoration(
+                  hintText: "Size",
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                  contentPadding: EdgeInsets.all(6.0),
+                ),
+                onFieldSubmitted: (submit) => _reset(),
+              ),
+            ),
+          ],
+        ),
+        Center(
+          child: SizedBox(
+            width: 250,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Score: $score',
+                  textAlign: TextAlign.start,
+                ),
+                SizedBox(
+                  width: 60,
+                ),
+                Text(
+                  'Highest: $highest',
+                  textAlign: TextAlign.end,
+                )
+              ],
+            ),
+          ),
+        ),
+        for (int i = 0; i < board.length; i++)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: board[i]
+                .map(
+                  (e) => Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      color: e == null ? Colors.grey : colors[e.value],
+                      //color: e.closeness.color,
+                      child: e != null
+                          ? FittedBox(
+                              fit: BoxFit.contain,
+                              child: Padding(
+                                padding: const EdgeInsets.all(2.0),
+                                child: Text(
+                                  e.value.toString(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Container(),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+      ],
     );
   }
 
@@ -247,7 +258,9 @@ class _P2048PageState extends ConsumerState<P2048Page> {
       }
     }
     var nextInt = math.Random().nextInt(indexOfNulls.length);
-    board[indexOfNulls[nextInt][0]][indexOfNulls[nextInt][1]] = Tile();
+    final tile = Tile();
+    if (math.Random().nextInt(100) <= 10) tile.increase();
+    board[indexOfNulls[nextInt][0]][indexOfNulls[nextInt][1]] = tile;
   }
 
   bool _move(int countDownFrom, int yIncr, int xIncr) {
